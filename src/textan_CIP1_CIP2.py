@@ -25,6 +25,7 @@ import random
 
 from textan_common import TextAnCommon
 from operator import itemgetter
+import math
 
 
 class TextAn(TextAnCommon):
@@ -49,7 +50,8 @@ class TextAn(TextAnCommon):
     """
 
     # Signes de ponctuation à retirer (compléter cette liste incomplète)
-    PONC = ["!", "?", ".", ",", ";", ":", "(", ")", "[", "]", "{", "}", "<", ">", "'", '"', "«", "»", "“", "”", "‘", "’"]
+    PONC = ["!", "?", ".", ",", ";", ":", "(", ")", "[", "]", "{", "}", "<", ">", "'", '"', "«", "»", "“", "”", "‘",
+            "’"]
 
     def __init__(self) -> None:
         """Initialize l'objet de type TextAn lorsqu'il est créé
@@ -97,10 +99,10 @@ class TextAn(TextAnCommon):
         for key in dict1:
             if key in dict2:
                 dot_product += dict1[key] * dict2[key]
-        
+
         if dict1_size != 0 and dict2_size != 0:
             dot_product = dot_product / (dict1_size * dict2_size)
-        
+
         return dot_product
 
     def dot_product_aut(self, auteur1: str, auteur2: str) -> float:
@@ -119,13 +121,13 @@ class TextAn(TextAnCommon):
         dict_auteur1 = self.mots_auteurs[auteur1]
         dict_auteur2 = self.mots_auteurs[auteur2]
 
-        dict1_size = len(dict_auteur1)
-        dict2_size = len(dict_auteur2)
+        dict1_size = int(math.sqrt(sum(value ** 2 for value in dict_auteur1.values())))
+
+        dict2_size = int(math.sqrt(sum(value ** 2 for value in dict_auteur2.values())))
 
         dot_product = self.dot_product_dict(dict_auteur1, dict_auteur2, dict1_size, dict2_size)
 
         return dot_product
-
 
     def dot_product_dict_aut(self, dict_oeuvre: dict, auteur: str) -> float:
         """Calcule le produit scalaire normalisé entre une oeuvre inconnue et les oeuvres d'un auteur,
@@ -143,9 +145,9 @@ class TextAn(TextAnCommon):
 
         dict_auteur = self.mots_auteurs[auteur]
 
-        dict1_size = len(dict_oeuvre)
-        dict2_size = len(dict_auteur)
+        dict1_size = int(math.sqrt(sum(value ** 2 for value in dict_oeuvre.values())))
 
+        dict2_size = int(math.sqrt(sum(value ** 2 for value in dict_auteur.values())))
 
         dot_product = self.dot_product_dict(dict_oeuvre, dict_auteur, dict1_size, dict2_size)
 
@@ -183,8 +185,12 @@ class TextAn(TextAnCommon):
 
         resultats = []
 
+        file = open(oeuvre, 'r', encoding="utf-8")
+        texte_oeuvre = file.read()
+
+        dict_oeuvre = self.create_dict(texte_oeuvre)
+      
         for auteur in self.auteurs:
-            dict_oeuvre = self.mots_auteurs[oeuvre]
             resultats.append((auteur, self.dot_product_dict_aut(dict_oeuvre, auteur)))
 
         return resultats
@@ -266,7 +272,7 @@ class TextAn(TextAnCommon):
 
         if auteur not in self.auteurs:
             return []
-        
+
         dict = self.mots_auteurs[auteur]
 
         # Fonction lambda pour trier le dictionnaire par valeur
@@ -284,18 +290,28 @@ class TextAn(TextAnCommon):
         if n < 1:
             n = 1
 
-        ngram = [ngram_sorted[n - 1][0]]
-        frequency = ngram_sorted[n - 1][1]
+        frequency = 0
 
+        ngram = []
 
-        for i in range(n+1, len(ngram_sorted)):
+        ## Trouver le n-ème élément (Si ex: [1, 2, 2, 3, 4, 4, 4, 5, 6] et n = 3, retourner [3])
+        for i in range(len(ngram_sorted)):
+            if ngram_sorted[i][1] != ngram_sorted[i - 1][1]:
+                n -= 1
+            if n == 0:
+                ngram = [list(ngram_sorted[i][0])]
+                frequency = ngram_sorted[i][1]
+                n = i
+                break
+
+        for i in range(n + 1, len(ngram_sorted)):
             # On vérifie si le n-gramme suivant a la même fréquence que le n-gramme actuel
             if ngram_sorted[i][1] == frequency:
                 # On ajoute le n-gramme à la liste
-                ngram.append(ngram_sorted[i][0])
+                ngram.append(list(ngram_sorted[i][0]))
             else:
                 break
-        
+
         # # Les lignes suivantes ne servent qu'à éliminer un avertissement.
         # # Il faut les retirer lorsque le code est complété
         # print(self.auteurs, auteur, n)
@@ -357,4 +373,3 @@ class TextAn(TextAnCommon):
                 texte_oeuvre = file.read()
                 self.mots_auteurs[auteur] = self.create_dict(texte_oeuvre)
         return
-
