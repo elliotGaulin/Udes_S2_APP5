@@ -189,11 +189,24 @@ class TextAn(TextAnCommon):
         texte_oeuvre = file.read()
 
         dict_oeuvre = self.create_dict(texte_oeuvre)
-      
+
         for auteur in self.auteurs:
             resultats.append((auteur, self.dot_product_dict_aut(dict_oeuvre, auteur)))
 
         return resultats
+
+    def write_words_to_file(self, words: [str], textname: str) -> None:
+        f = open(textname, 'w', encoding='utf-8')
+        word_count = 0
+        for word in words:
+            f.write(word)
+            word_count += 1
+            if word_count % 10 == 0:
+                f.write('\n')
+            else:
+                f.write(' ')
+
+        f.close()
 
     def gen_text_all(self, taille: int, textname: str) -> None:
         """Après analyse des textes d'auteurs connus, produire un texte selon des statistiques de l'ensemble des auteurs
@@ -207,8 +220,36 @@ class TextAn(TextAnCommon):
         """
 
         # Ce print ne sert qu'à éliminer un avertissement. Il doit être retiré lorsque le code est complété
-        print(self.auteurs, taille, textname)
+        markov_dict = {}
+        mots_tout_auteurs = {}
+        for auteur in self.auteurs:
+            for ngram, freq in self.mots_auteurs[auteur].items():
+                if ngram not in mots_tout_auteurs:
+                    mots_tout_auteurs[ngram] = 0
+                mots_tout_auteurs[ngram] += freq
+                prefix = ngram[:len(ngram) - 1]
+                suffix = ngram[-1]
+                if prefix not in markov_dict:
+                    markov_dict[prefix] = {}
 
+                markov_dict[prefix][suffix] = freq
+
+        first_n_gram = random.choices(list(mots_tout_auteurs.keys()), weights=list(mots_tout_auteurs.values()))[0]
+        words = list(first_n_gram)
+        for i in range(0, taille - self.ngram):
+            if self.ngram == 1:
+                next_word = random.choices(list(mots_tout_auteurs.keys()), weights=list(mots_tout_auteurs.values()))[0][
+                    0]
+            else:
+                last_prefix = tuple(words[-self.ngram + 1:])
+                if last_prefix not in markov_dict:
+                    break
+                possible_next_words = markov_dict[last_prefix]
+                next_word = \
+                random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
+            words.append(next_word)
+
+        self.write_words_to_file(words, textname)
         return
 
     def gen_text_auteur(self, auteur: str, taille: int, textname: str) -> None:
@@ -227,7 +268,7 @@ class TextAn(TextAnCommon):
 
         markov_dict = {}
         for ngram, freq in self.mots_auteurs[auteur].items():
-            prefix = ngram[:len(ngram)-1]
+            prefix = ngram[:len(ngram) - 1]
             suffix = ngram[-1]
             if prefix not in markov_dict:
                 markov_dict[prefix] = {}
@@ -235,30 +276,23 @@ class TextAn(TextAnCommon):
             markov_dict[prefix][suffix] = freq
 
         sorted_prefixes = sorted(markov_dict.items(), key=lambda key: len(key[1]), reverse=True)
-        first_n_gram = random.choices(list(self.mots_auteurs[auteur].keys()), weights=list(self.mots_auteurs[auteur].values()))[0]
+        first_n_gram = \
+        random.choices(list(self.mots_auteurs[auteur].keys()), weights=list(self.mots_auteurs[auteur].values()))[0]
         words = list(first_n_gram)
         for i in range(0, taille - self.ngram):
             if self.ngram == 1:
-                next_word = random.choices(list(self.mots_auteurs[auteur].keys()), weights=list(self.mots_auteurs[auteur].values()))[0][0]
+                next_word = random.choices(list(self.mots_auteurs[auteur].keys()),
+                                           weights=list(self.mots_auteurs[auteur].values()))[0][0]
             else:
                 last_prefix = tuple(words[-self.ngram + 1:])
                 if last_prefix not in markov_dict:
                     break
                 possible_next_words = markov_dict[last_prefix]
-                next_word = random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
+                next_word = \
+                random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
             words.append(next_word)
 
-        f = open(textname, 'w', encoding='utf-8')
-        word_count = 0
-        for word in words:
-            f.write(word)
-            word_count += 1
-            if word_count % 10 == 0:
-                f.write('\n')
-            else:
-                f.write(' ')
-
-        f.close()
+        self.write_words_to_file(words, textname)
         return
 
     def get_nth_element(self, auteur: str, n: int) -> [[str]]:
