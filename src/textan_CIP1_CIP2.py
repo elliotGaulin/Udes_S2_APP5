@@ -118,8 +118,9 @@ class TextAn(TextAnCommon):
         dict_auteur1 = self.mots_auteurs[auteur1]
         dict_auteur2 = self.mots_auteurs[auteur2]
 
-        dict1_size = len(dict_auteur1)
-        dict2_size = len(dict_auteur2)
+        # Calculer la taille des vecteurs M et T
+        dict1_size = sum(dict_auteur1.values())
+        dict2_size = sum(dict_auteur2.values())
 
         dot_product = self.dot_product_dict(dict_auteur1, dict_auteur2, dict1_size, dict2_size)
 
@@ -142,8 +143,8 @@ class TextAn(TextAnCommon):
 
         dict_auteur = self.mots_auteurs[auteur]
 
-        dict1_size = len(dict_oeuvre)
-        dict2_size = len(dict_auteur)
+        dict1_size = sum(dict_oeuvre.values())
+        dict2_size = sum(dict_auteur.values())
 
 
         dot_product = self.dot_product_dict(dict_oeuvre, dict_auteur, dict1_size, dict2_size)
