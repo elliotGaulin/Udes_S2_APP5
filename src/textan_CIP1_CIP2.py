@@ -238,11 +238,14 @@ class TextAn(TextAnCommon):
         first_n_gram = random.choices(list(self.mots_auteurs[auteur].keys()), weights=list(self.mots_auteurs[auteur].values()))[0]
         words = list(first_n_gram)
         for i in range(0, taille - self.ngram):
-            last_prefix = tuple(words[-self.ngram + 1:])
-            if last_prefix not in markov_dict:
-                break
-            possible_next_words = markov_dict[last_prefix]
-            next_word = random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
+            if self.ngram == 1:
+                next_word = random.choices(list(self.mots_auteurs[auteur].keys()), weights=list(self.mots_auteurs[auteur].values()))[0][0]
+            else:
+                last_prefix = tuple(words[-self.ngram + 1:])
+                if last_prefix not in markov_dict:
+                    break
+                possible_next_words = markov_dict[last_prefix]
+                next_word = random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
             words.append(next_word)
 
         f = open(textname, 'w', encoding='utf-8')
