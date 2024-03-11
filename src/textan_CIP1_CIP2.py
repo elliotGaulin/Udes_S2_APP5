@@ -255,6 +255,8 @@ class TextAn(TextAnCommon):
 
         frequency = 0
 
+        ngram = []
+
 
 
         ## Trouver le n-ème élément (Si ex: [1, 2, 2, 3, 4, 4, 4, 5, 6] et n = 3, retourner [3])
@@ -266,7 +268,7 @@ class TextAn(TextAnCommon):
                 frequency = ngram_sorted[i][1]
                 n = i
                 break
-            
+
 
 
         for i in range(n+1, len(ngram_sorted)):
