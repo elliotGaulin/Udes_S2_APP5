@@ -90,13 +90,15 @@ class TextAn(TextAnCommon):
         Copyright 2023, F. Mailhot et Université de Sherbrooke
         """
 
-        # Les lignes qui suivent ne servent qu'à éliminer un avertissement.
-        # Il faut les retirer et les remplacer par du code fonctionnel
-        dot_product = 1.0
-        print(dict1_size, dict2_size)
-        if dict1 != dict2:
-            dot_product = 0.0
+        dot_product = 0.0
 
+        for key in dict1:
+            if key in dict2:
+                dot_product += dict1[key] * dict2[key]
+        
+        if dict1_size != 0 and dict2_size != 0:
+            dot_product = dot_product / (dict1_size * dict2_size)
+        
         return dot_product
 
     def dot_product_aut(self, auteur1: str, auteur2: str) -> float:
@@ -112,14 +114,16 @@ class TextAn(TextAnCommon):
         Copyright 2023, F. Mailhot et Université de Sherbrooke
         """
 
-        # Les lignes qui suivent ne servent qu'à éliminer un avertissement.
-        # Il faut les retirer et les remplacer par du code fonctionnel
-        dot_product = 0.0
-        print(self)
-        if auteur1 == auteur2:
-            print(auteur1, auteur2)
-            dot_product = 1.0
+        dict_auteur1 = self.mots_auteurs[auteur1]
+        dict_auteur2 = self.mots_auteurs[auteur2]
+
+        dict1_size = len(dict_auteur1)
+        dict2_size = len(dict_auteur2)
+
+        dot_product = self.dot_product_dict(dict_auteur1, dict_auteur2, dict1_size, dict2_size)
+
         return dot_product
+
 
     def dot_product_dict_aut(self, dict_oeuvre: dict, auteur: str) -> float:
         """Calcule le produit scalaire normalisé entre une oeuvre inconnue et les oeuvres d'un auteur,
@@ -135,14 +139,14 @@ class TextAn(TextAnCommon):
         Copyright 2023, F. Mailhot et Université de Sherbrooke
         """
 
-        # Les lignes qui suivent ne servent qu'à éliminer un avertissement.
-        # Il faut les retirer et les remplacer par du code fonctionnel
-        dot_product = 0.0
-        print(self)
-        if auteur in dict_oeuvre:
-            print(dict_oeuvre)
-            print(auteur)
-            dot_product = 1.0
+        dict_auteur = self.mots_auteurs[auteur]
+
+        dict1_size = len(dict_oeuvre)
+        dict2_size = len(dict_auteur)
+
+
+        dot_product = self.dot_product_dict(dict_oeuvre, dict_auteur, dict1_size, dict2_size)
+
         return dot_product
 
     def find_author(self, oeuvre: str) -> []:
@@ -158,13 +162,13 @@ class TextAn(TextAnCommon):
             où la proximité est un nombre entre 0 et 1)
         """
 
-        # Les lignes suivantes ne servent qu'à éliminer un avertissement.
-        # Il faut les retirer lorsque le code est complété
-        print(self.auteurs, oeuvre)
-        resultats = [
-            ("Premier_auteur", 0.1234),
-            ("Deuxième_auteur", 0.1123),
-        ]  # Exemple du format des sorties
+        # # Les lignes suivantes ne servent qu'à éliminer un avertissement.
+        # # Il faut les retirer lorsque le code est complété
+        # print(self.auteurs, oeuvre)
+        # resultats = [
+        #     ("Premier_auteur", 0.1234),
+        #     ("Deuxième_auteur", 0.1123),
+        # ]  # Exemple du format des sorties
 
         # Ajouter votre code pour déterminer la proximité du fichier passé en paramètre avec chacun des auteurs
         # Retourner la liste des auteurs, chacun avec sa proximité au fichier inconnu
@@ -174,6 +178,12 @@ class TextAn(TextAnCommon):
         #   Le produit scalaire devrait être normalisé avec la taille du vecteur associé au texte inconnu :
         #   proximité = (A dot product B) / (|A| |B|)   où A est le vecteur du texte inconnu et B est celui d'un auteur,
         #           "dot product" est le produit scalaire, et |X| est la norme (longueur) du vecteur X
+
+        resultats = []
+
+        for auteur in self.auteurs:
+            dict_oeuvre = self.mots_auteurs[oeuvre]
+            resultats.append((auteur, self.dot_product_dict_aut(dict_oeuvre, auteur)))
 
         return resultats
 
@@ -221,10 +231,43 @@ class TextAn(TextAnCommon):
             ngram (List[Liste[string]]) : Liste de liste de mots composant le n-gramme recherché
             (il est possible qu'il y ait plus d'un n-gramme au même rang)
         """
-        # Les lignes suivantes ne servent qu'à éliminer un avertissement.
-        # Il faut les retirer lorsque le code est complété
-        print(self.auteurs, auteur, n)
-        ngram = [["un", "roman"]]  # Exemple du format de sortie d'un bigramme
+
+        if auteur not in self.auteurs:
+            return []
+        
+        dict = self.mots_auteurs[auteur]
+
+        # Fonction lambda pour trier le dictionnaire par valeur
+        # dict.items() retourne une liste de tuples (clé, valeur)
+        # key=lambda x: x[1] trie par valeur
+        # reverse=True trie en ordre décroissant
+
+        ngram_sorted = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+
+        # On retourne le n-ème élément de la liste triée
+        # Si un ou plusieurs n-grammes ont la même fréquence, on les retourne tous
+
+        if n > len(ngram_sorted):
+            return []
+        if n < 1:
+            n = 1
+
+        ngram = [ngram_sorted[n - 1][0]]
+        frequency = ngram_sorted[n - 1][1]
+
+
+        for i in range(n+1, len(ngram_sorted)):
+            # On vérifie si le n-gramme suivant a la même fréquence que le n-gramme actuel
+            if ngram_sorted[i][1] == frequency:
+                # On ajoute le n-gramme à la liste
+                ngram.append(ngram_sorted[i][0])
+            else:
+                break
+        
+        # # Les lignes suivantes ne servent qu'à éliminer un avertissement.
+        # # Il faut les retirer lorsque le code est complété
+        # print(self.auteurs, auteur, n)
+        # ngram = [["un", "roman"]]  # Exemple du format de sortie d'un bigramme
         return ngram
 
     def analyze(self) -> None:
