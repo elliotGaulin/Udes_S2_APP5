@@ -263,9 +263,9 @@ class TextAn(TextAnCommon):
 
                 mots = texte_oeuvre.split()
                 if self.remove_word_1:
-                    mots = [mots for mot in mots if len(mot) > 1]
+                    mots = [mot for mot in mots if (len(mot) > 1)]
                 if self.remove_word_2:
-                    mots = [mots for mot in mots if len(mot) > 2]
+                    mots = [mot for mot in mots if (len(mot) > 2)]
 
                 for i in range(0, len(mots) - self.ngram):
                     ngram = self.get_empty_ngram(self.ngram)
