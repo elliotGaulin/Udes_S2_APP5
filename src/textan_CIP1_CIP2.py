@@ -23,6 +23,7 @@
 """
 
 from textan_common import TextAnCommon
+from operator import itemgetter
 
 
 class TextAn(TextAnCommon):
@@ -239,10 +240,10 @@ class TextAn(TextAnCommon):
 
         # Fonction lambda pour trier le dictionnaire par valeur
         # dict.items() retourne une liste de tuples (clé, valeur)
-        # key=lambda x: x[1] trie par valeur
+        # key=itemgetter(1) trie la liste par la fréquence (valeur)
         # reverse=True trie en ordre décroissant
 
-        ngram_sorted = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+        ngram_sorted = sorted(dict.items(), key=itemgetter(1), reverse=True)
 
         # On retourne le n-ème élément de la liste triée
         # Si un ou plusieurs n-grammes ont la même fréquence, on les retourne tous
