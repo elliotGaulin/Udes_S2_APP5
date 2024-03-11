@@ -76,7 +76,7 @@ class TextAn(TextAnCommon):
 
     @staticmethod
     def dot_product_dict(
-        dict1: dict, dict2: dict, dict1_size: int, dict2_size: int
+            dict1: dict, dict2: dict, dict1_size: int, dict2_size: int
     ) -> float:
         """Calcule le produit scalaire NORMALISÉ de deux vecteurs représentés par des dictionnaires
 
@@ -250,9 +250,31 @@ class TextAn(TextAnCommon):
         #   De cette façon, les mots d'un court poème auraient une importance beaucoup plus grande que
         #   les mots d'une très longue oeuvre du même auteur. Ce n'est PAS ce qui vous est demandé ici.
 
-        # Ces trois lignes ne servent qu'à éliminer un avertissement. Il faut les retirer lorsque le code est complété
-        ngram = self.get_empty_ngram(2)
-        print(ngram)
-        print(self.auteurs)
+        for auteur in self.auteurs:
+            print(auteur)
+            oeuvres = self.get_aut_files(auteur)
+            dict_auteur = self.mots_auteurs[auteur]
+            for oeuvre in oeuvres:
+                file = open(oeuvre, 'r', encoding="utf-8")
+                texte_oeuvre = file.read()
+                if not self.keep_ponc:
+                    for PONC_sign in self.PONC:
+                        texte_oeuvre.replace(PONC_sign, '')
 
+                mots = texte_oeuvre.split()
+                if self.remove_word_1:
+                    mots = [mots for mot in mots if len(mot) > 1]
+                if self.remove_word_2:
+                    mots = [mots for mot in mots if len(mot) > 2]
+
+                for i in range(0, len(mots) - self.ngram):
+                    ngram = self.get_empty_ngram(self.ngram)
+                    for j in range(0, self.ngram):
+                        ngram[j] = mots[i + j]
+                    ngram_tuple = tuple(ngram)
+                    if ngram_tuple in dict_auteur:
+                        dict_auteur[ngram_tuple] += 1
+                    else:
+                        dict_auteur[ngram_tuple] = 1
         return
+
