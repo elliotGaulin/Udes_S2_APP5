@@ -185,10 +185,10 @@ class TextAn(TextAnCommon):
 
         resultats = []
 
-        dict_oeuvre = {}
-
         file = open(oeuvre, 'r', encoding="utf-8")
         texte_oeuvre = file.read()
+
+        dict_oeuvre = self.create_dict(texte_oeuvre)
         if not self.keep_ponc:
             for PONC_sign in self.PONC:
                 texte_oeuvre.replace(PONC_sign, '')
