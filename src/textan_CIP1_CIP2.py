@@ -189,26 +189,7 @@ class TextAn(TextAnCommon):
         texte_oeuvre = file.read()
 
         dict_oeuvre = self.create_dict(texte_oeuvre)
-        if not self.keep_ponc:
-            for PONC_sign in self.PONC:
-                texte_oeuvre.replace(PONC_sign, '')
-
-        mots = texte_oeuvre.split()
-        if self.remove_word_1:
-            mots = [mot for mot in mots if (len(mot) > 1)]
-        if self.remove_word_2:
-            mots = [mot for mot in mots if (len(mot) > 2)]
-
-        for i in range(0, len(mots) - self.ngram):
-            ngram = self.get_empty_ngram(self.ngram)
-            for j in range(0, self.ngram):
-                ngram[j] = mots[i + j]
-            ngram_tuple = tuple(ngram)
-            if ngram_tuple in dict_oeuvre.keys():
-                dict_oeuvre[ngram_tuple] += 1
-            else:
-                dict_oeuvre[ngram_tuple] = 1
-
+      
         for auteur in self.auteurs:
             resultats.append((auteur, self.dot_product_dict_aut(dict_oeuvre, auteur)))
 
