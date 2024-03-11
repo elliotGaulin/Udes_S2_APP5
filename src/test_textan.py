@@ -699,7 +699,7 @@ def main() -> None:
             tta.check_auteur_distance()
 
         # Si le code étudiant est trop lent (120 secondes par défaut), interrompre
-        except debug_handler.DebugHandlerTimeOutException:
+        except debug_handler_common.DebugHandlerTimeOutException:
             tta.debug_handler.print_timeout_exception()
 
         # Mauvaise pratique (attraper toutes les exceptions), mais nécessaire ici, pour du code étudiant inconnu
