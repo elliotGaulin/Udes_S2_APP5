@@ -21,6 +21,7 @@
 
     Copyright 2018-2023, F. Mailhot et Université de Sherbrooke
 """
+import random
 
 from textan_common import TextAnCommon
 from operator import itemgetter
@@ -242,8 +243,38 @@ class TextAn(TextAnCommon):
         """
 
         # Ce print ne sert qu'à éliminer un avertissement. Il doit être retiré lorsque le code est complété
-        print(self.auteurs, auteur, taille, textname)
 
+        markov_dict = {}
+        for ngram, freq in self.mots_auteurs[auteur].items():
+            prefix = ngram[:len(ngram)-1]
+            suffix = ngram[-1]
+            if prefix not in markov_dict:
+                markov_dict[prefix] = {}
+
+            markov_dict[prefix][suffix] = freq
+
+        sorted_prefixes = sorted(markov_dict.items(), key=lambda key: len(key[1]), reverse=True)
+        first_n_gram = random.choices(list(self.mots_auteurs[auteur].keys()), weights=list(self.mots_auteurs[auteur].values()))[0]
+        words = list(first_n_gram)
+        for i in range(0, taille - self.ngram):
+            last_prefix = tuple(words[-self.ngram + 1:])
+            if last_prefix not in markov_dict:
+                break
+            possible_next_words = markov_dict[last_prefix]
+            next_word = random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
+            words.append(next_word)
+
+        f = open(textname, 'w')
+        word_count = 0
+        for word in words:
+            f.write(word)
+            word_count += 1
+            if word_count % 10 == 0:
+                f.write('\n')
+            else:
+                f.write(' ')
+
+        f.close()
         return
 
     def get_nth_element(self, auteur: str, n: int) -> [[str]]:
@@ -306,6 +337,30 @@ class TextAn(TextAnCommon):
         # ngram = [["un", "roman"]]  # Exemple du format de sortie d'un bigramme
         return ngram
 
+    def create_dict(self, text: str) -> dict:
+        result_dict = {}
+        text = text.lower()
+        if not self.keep_ponc:
+            for PONC_sign in self.PONC:
+                text.replace(PONC_sign, '')
+
+        mots = text.split()
+        if self.remove_word_1:
+            mots = [mot for mot in mots if (len(mot) > 1)]
+        if self.remove_word_2:
+            mots = [mot for mot in mots if (len(mot) > 2)]
+
+        for i in range(0, len(mots) - self.ngram):
+            ngram = self.get_empty_ngram(self.ngram)
+            for j in range(0, self.ngram):
+                ngram[j] = mots[i + j]
+            ngram_tuple = tuple(ngram)
+            if ngram_tuple in result_dict:
+                result_dict[ngram_tuple] += 1
+            else:
+                result_dict[ngram_tuple] = 1
+        return result_dict
+
     def analyze(self) -> None:
         """Fait l'analyse des textes fournis, en traitant chaque oeuvre de chaque auteur
 
@@ -332,27 +387,8 @@ class TextAn(TextAnCommon):
         for auteur in self.auteurs:
             print(auteur)
             oeuvres = self.get_aut_files(auteur)
-            dict_auteur = self.mots_auteurs[auteur]
             for oeuvre in oeuvres:
                 file = open(oeuvre, 'r', encoding="utf-8")
                 texte_oeuvre = file.read()
-                if not self.keep_ponc:
-                    for PONC_sign in self.PONC:
-                        texte_oeuvre.replace(PONC_sign, '')
-
-                mots = texte_oeuvre.split()
-                if self.remove_word_1:
-                    mots = [mot for mot in mots if (len(mot) > 1)]
-                if self.remove_word_2:
-                    mots = [mot for mot in mots if (len(mot) > 2)]
-
-                for i in range(0, len(mots) - self.ngram):
-                    ngram = self.get_empty_ngram(self.ngram)
-                    for j in range(0, self.ngram):
-                        ngram[j] = mots[i + j]
-                    ngram_tuple = tuple(ngram)
-                    if ngram_tuple in dict_auteur:
-                        dict_auteur[ngram_tuple] += 1
-                    else:
-                        dict_auteur[ngram_tuple] = 1
+                self.mots_auteurs[auteur] = self.create_dict(texte_oeuvre)
         return
