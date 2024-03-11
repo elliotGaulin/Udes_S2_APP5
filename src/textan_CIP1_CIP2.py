@@ -239,7 +239,7 @@ class TextAn(TextAnCommon):
             next_word = random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
             words.append(next_word)
 
-        f = open(textname, 'w')
+        f = open(textname, 'w', encoding='utf-8')
         word_count = 0
         for word in words:
             f.write(word)
