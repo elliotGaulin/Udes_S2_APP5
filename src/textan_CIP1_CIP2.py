@@ -253,15 +253,27 @@ class TextAn(TextAnCommon):
         if n < 1:
             n = 1
 
-        ngram = [ngram_sorted[n - 1][0]]
-        frequency = ngram_sorted[n - 1][1]
+        frequency = 0
+
+
+
+        ## Trouver le n-ème élément (Si ex: [1, 2, 2, 3, 4, 4, 4, 5, 6] et n = 3, retourner [3])
+        for i in range(len(ngram_sorted)):
+            if ngram_sorted[i][1] != ngram_sorted[i - 1][1]:
+                n -= 1
+            if n == 0:
+                ngram = [list(ngram_sorted[i][0])]
+                frequency = ngram_sorted[i][1]
+                n = i
+                break
+            
 
 
         for i in range(n+1, len(ngram_sorted)):
             # On vérifie si le n-gramme suivant a la même fréquence que le n-gramme actuel
             if ngram_sorted[i][1] == frequency:
                 # On ajoute le n-gramme à la liste
-                ngram.append(ngram_sorted[i][0])
+                ngram.append(list(ngram_sorted[i][0]))
             else:
                 break
         
