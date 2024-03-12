@@ -51,7 +51,7 @@ class TextAn(TextAnCommon):
 
     # Signes de ponctuation à retirer (compléter cette liste incomplète)
     PONC = ["!", "?", ".", ",", ";", ":", "(", ")", "[", "]", "{", "}", "<", ">", "'", '"', "«", "»", "“", "”", "‘",
-            "’", "...", "/", "-"]
+            "’", "/"]
 
     def __init__(self) -> None:
         """Initialize l'objet de type TextAn lorsqu'il est créé
@@ -199,12 +199,13 @@ class TextAn(TextAnCommon):
         f = open(textname, 'w', encoding='utf-8')
         word_count = 0
         for word in words:
+            if word_count != 0 and word not in self.PONC:
+                if word_count % 10 == 0:
+                    f.write('\n')
+                else:
+                    f.write(' ')
             f.write(word)
             word_count += 1
-            if word_count % 10 == 0:
-                f.write('\n')
-            else:
-                f.write(' ')
 
         f.close()
 
@@ -363,9 +364,12 @@ class TextAn(TextAnCommon):
     def create_dict(self, text: str) -> dict:
         result_dict = {}
         text = text.lower()
-        if not self.keep_ponc:
-            for PONC_sign in self.PONC:
-                text.replace(PONC_sign, '')
+        for PONC_sign in self.PONC:
+            if self.keep_ponc:
+                text = text.replace(PONC_sign, ' ' + PONC_sign + ' ')
+            else:
+                text = text.replace(PONC_sign, '')
+        text = text.replace('-', ' - ')
 
         mots = text.split()
         if self.remove_word_1:
