@@ -51,7 +51,7 @@ class TextAn(TextAnCommon):
 
     # Signes de ponctuation à retirer (compléter cette liste incomplète)
     PONC = ["!", "?", ".", ",", ";", ":", "(", ")", "[", "]", "{", "}", "<", ">", "'", '"', "«", "»", "“", "”", "‘",
-            "’", "/"]
+            "’", "/", '—']
     PONC_A_GARDER = ['-']
 
     def __init__(self) -> None:
