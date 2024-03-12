@@ -97,6 +97,10 @@ class TextAn(TextAnCommon):
 
         dot_product = 0.0
 
+        # Permuter les dictionnaires pour réduire le nombre d'opérations
+        if len(dict1) > len(dict2):
+            dict1, dict2 = dict2, dict1
+
         for key in dict1:
             if key in dict2:
                 dot_product += dict1[key] * dict2[key]
