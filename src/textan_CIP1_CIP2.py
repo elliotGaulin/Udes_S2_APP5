@@ -52,6 +52,7 @@ class TextAn(TextAnCommon):
     # Signes de ponctuation à retirer (compléter cette liste incomplète)
     PONC = ["!", "?", ".", ",", ";", ":", "(", ")", "[", "]", "{", "}", "<", ">", "'", '"', "«", "»", "“", "”", "‘",
             "’", "/"]
+    PONC_A_GARDER = ['-']
 
     def __init__(self) -> None:
         """Initialize l'objet de type TextAn lorsqu'il est créé
@@ -188,7 +189,7 @@ class TextAn(TextAnCommon):
         file = open(oeuvre, 'r', encoding="utf-8")
         texte_oeuvre = file.read()
 
-        dict_oeuvre = self.create_dict(texte_oeuvre)
+        dict_oeuvre = self.create_dict(texte_oeuvre, {})
 
         for auteur in self.auteurs:
             resultats.append((auteur, self.dot_product_dict_aut(dict_oeuvre, auteur)))
@@ -247,7 +248,7 @@ class TextAn(TextAnCommon):
                     break
                 possible_next_words = markov_dict[last_prefix]
                 next_word = \
-                random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
+                    random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
             words.append(next_word)
 
         self.write_words_to_file(words, textname)
@@ -278,7 +279,7 @@ class TextAn(TextAnCommon):
 
         sorted_prefixes = sorted(markov_dict.items(), key=lambda key: len(key[1]), reverse=True)
         first_n_gram = \
-        random.choices(list(self.mots_auteurs[auteur].keys()), weights=list(self.mots_auteurs[auteur].values()))[0]
+            random.choices(list(self.mots_auteurs[auteur].keys()), weights=list(self.mots_auteurs[auteur].values()))[0]
         words = list(first_n_gram)
         for i in range(0, taille - self.ngram):
             if self.ngram == 1:
@@ -290,7 +291,7 @@ class TextAn(TextAnCommon):
                     break
                 possible_next_words = markov_dict[last_prefix]
                 next_word = \
-                random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
+                    random.choices(list(possible_next_words.keys()), weights=list(possible_next_words.values()))[0]
             words.append(next_word)
 
         self.write_words_to_file(words, textname)
@@ -356,15 +357,16 @@ class TextAn(TextAnCommon):
         # ngram = [["un", "roman"]]  # Exemple du format de sortie d'un bigramme
         return ngram
 
-    def create_dict(self, text: str) -> dict:
-        result_dict = {}
+    def create_dict(self, text: str, existing_dict: dict) -> dict:
+        result_dict = existing_dict
         text = text.lower()
         for PONC_sign in self.PONC:
             if self.keep_ponc:
                 text = text.replace(PONC_sign, ' ' + PONC_sign + ' ')
             else:
                 text = text.replace(PONC_sign, '')
-        text = text.replace('-', ' - ')
+        for PONC_sign in self.PONC_A_GARDER:
+            text = text.replace(PONC_sign, ' ' + PONC_sign + ' ')
 
         mots = text.split()
         if self.remove_word_1:
@@ -412,5 +414,5 @@ class TextAn(TextAnCommon):
             for oeuvre in oeuvres:
                 file = open(oeuvre, 'r', encoding="utf-8")
                 texte_oeuvre = file.read()
-                self.mots_auteurs[auteur] = self.create_dict(texte_oeuvre)
+                self.mots_auteurs[auteur] = self.create_dict(texte_oeuvre, self.mots_auteurs[auteur])
         return
