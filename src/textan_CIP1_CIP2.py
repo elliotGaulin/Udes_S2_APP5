@@ -331,10 +331,15 @@ class TextAn(TextAnCommon):
 
         ngram = []
 
+        all_same_frequency = True
+
         ## Trouver le n-ème élément (Si ex: [1, 2, 2, 3, 4, 4, 4, 5, 6] et n = 3, retourner [3])
         for i in range(len(ngram_sorted)):
             if ngram_sorted[i][1] != ngram_sorted[i - 1][1]:
                 n -= 1
+                all_same_frequency = False
+            if all_same_frequency and n != 0:
+                n = 0
             if n == 0:
                 ngram = [list(ngram_sorted[i][0])]
                 frequency = ngram_sorted[i][1]
