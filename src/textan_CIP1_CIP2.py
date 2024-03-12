@@ -103,6 +103,9 @@ class TextAn(TextAnCommon):
         if dict1_size != 0 and dict2_size != 0:
             dot_product = dot_product / (dict1_size * dict2_size)
 
+        if dot_product > 1:
+            dot_product = 1
+
         return dot_product
 
     def dot_product_aut(self, auteur1: str, auteur2: str) -> float:
